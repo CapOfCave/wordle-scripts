@@ -81,14 +81,14 @@ public class PuzzleGenerator {
     private static float evaluateSolution(String guess1, String guess2, int pattern, String solution) {
         int yellows = 0;
         int greens = 0;
-        for (int i = 0; i < WORD_LENGTH; i++) {
-            pattern /= 3;
+        while (pattern >= 1) {
             int currentChar = pattern % 3;
             yellows += currentChar == 1 ? 1 : 0;
             greens += currentChar == 2 ? 1 : 0;
+            pattern /= 3;
         }
 
-        return (5 - greens - yellows / 2.01f) / 5;
+        return (10 - greens - yellows / 2.01f) / 10;
     }
 
     private static String compactToReadable(int pattern) {
