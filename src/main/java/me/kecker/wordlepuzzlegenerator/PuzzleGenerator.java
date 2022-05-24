@@ -1,7 +1,6 @@
 package me.kecker.wordlepuzzlegenerator;
 
 import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -13,7 +12,10 @@ import static me.kecker.wordlepuzzlegenerator.WordleEvaluator.WORD_LENGTH;
 
 public class PuzzleGenerator {
 
+    private static final float SCORE_THRESHOLD = 0.9f;
+
     public static void main(String[] args) throws IOException {
+        long startTime = System.currentTimeMillis();
         List<String> answerList = WordLoader.loadAnswerList();
         List<String> guessList = WordLoader.loadAnswerList();
         System.out.println("Starting...");
@@ -29,6 +31,8 @@ public class PuzzleGenerator {
         }
 
         int[] taken = new int[(int) Math.pow(3, WORD_LENGTH * 2)];
+        int solutionCount = 0;
+        int takenSolutions = 0;
 
         Path file = args.length > 0 ? Paths.get(args[0]) : Paths.get(System.getProperty("user.home"), "puzzles.txt");
         FileWriter fw = new FileWriter(file.toFile());
@@ -49,8 +53,13 @@ public class PuzzleGenerator {
                 }
                 for (int pattern = 0; pattern < taken.length; pattern++) {
                     if (taken[pattern] <= 0) continue;
+                    solutionCount++;
                     int answerIndex = taken[pattern] - 1;
-                    bw.write(String.format("%s,%s,%s,%s,%d", guessList.get(j), guessList.get(k), twoCompactsToReadable(pattern), answerList.get(answerIndex), answerIndex));
+                    float solutionScore = evaluateSolution(guessList.get(j), guessList.get(k), pattern, answerList.get(answerIndex));
+                    if (solutionScore < SCORE_THRESHOLD) continue;
+                    takenSolutions++;
+//                    bw.write(String.format("%s,%s,%s,%s,%d,%f", guessList.get(j), guessList.get(k), twoCompactsToReadable(pattern), answerList.get(answerIndex), answerIndex, solutionScore));
+                    bw.write(guessList.get(j) + "," + guessList.get(k) + "," + twoCompactsToReadable(pattern) + "," + answerList.get(answerIndex) + "," + answerIndex + "," + solutionScore);
                     bw.newLine();
                 }
 
@@ -62,7 +71,24 @@ public class PuzzleGenerator {
         }
 
         bw.close();
-        System.out.println("Completed.");
+        System.out.printf("Completed in %d seconds. Found %d solutions, %d of which passed the threshold and were included in the output file at %s.%n", (System.currentTimeMillis() - startTime) / 1000, solutionCount, takenSolutions, file);
+    }
+
+
+    /**
+     * Higher = better
+     */
+    private static float evaluateSolution(String guess1, String guess2, int pattern, String solution) {
+        int yellows = 0;
+        int greens = 0;
+        for (int i = 0; i < WORD_LENGTH; i++) {
+            pattern /= 3;
+            int currentChar = pattern % 3;
+            yellows += currentChar == 1 ? 1 : 0;
+            greens += currentChar == 2 ? 1 : 0;
+        }
+
+        return (5 - greens - yellows / 2.01f) / 5;
     }
 
     private static String compactToReadable(int pattern) {
@@ -70,7 +96,9 @@ public class PuzzleGenerator {
     }
 
     private static String twoCompactsToReadable(int pattern) {
-        return String.format("%10s", Integer.toString(pattern, 3)).replace(' ', '0');
+        String str = Integer.toString(pattern, 3);
+        return "0".repeat(10 - str.length()) + str;
+//        return String.format("%10s", Integer.toString(pattern, 3)).replace(' ', '0');
     }
 
 
