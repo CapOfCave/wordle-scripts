@@ -1,4 +1,4 @@
-package me.kecker.wordlepuzzlegenerator;
+package me.kecker.wordlegen;
 
 import java.util.Locale;
 
@@ -8,7 +8,6 @@ public class WordleEvaluator {
     public static final int MAX_RESULT_BIT_LENGTH = WORD_LENGTH * 2;
     public static final int MAX_RESULT_VALUE = (int) Math.pow(2, MAX_RESULT_BIT_LENGTH) - 1;
     public static final int MAX_RESULT_VALUE_COMPACT = (int) Math.pow(3, WORD_LENGTH) - 1;
-
 
 
     /**

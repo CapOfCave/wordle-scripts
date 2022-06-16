@@ -1,5 +1,6 @@
-package me.kecker.wordlepuzzlegenerator;
+package me.kecker.wordlegen.puzzles;
 
+import me.kecker.wordlegen.WordleEvaluator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

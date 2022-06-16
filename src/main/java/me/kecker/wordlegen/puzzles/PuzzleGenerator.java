@@ -1,4 +1,7 @@
-package me.kecker.wordlepuzzlegenerator;
+package me.kecker.wordlegen.puzzles;
+
+import me.kecker.wordlegen.Timer;
+import me.kecker.wordlegen.WordleEvaluator;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -8,27 +11,21 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static me.kecker.wordlepuzzlegenerator.WordleEvaluator.WORD_LENGTH;
+import static me.kecker.wordlegen.FileLoader.loadFile;
+import static me.kecker.wordlegen.Visualizer.twoCompactsToReadable;
+import static me.kecker.wordlegen.WordleAnalyser.createSolutions;
+import static me.kecker.wordlegen.WordleEvaluator.WORD_LENGTH;
 
 public class PuzzleGenerator {
 
     private static final float SCORE_THRESHOLD = 0.9f;
 
     public static void main(String[] args) throws IOException {
-        long startTime = System.currentTimeMillis();
-        List<String> answerList = WordLoader.loadAnswerList();
-        List<String> guessList = WordLoader.loadAnswerList();
+        Timer timer = Timer.start();
+        List<String> answerList = loadAnswerList();
+        List<String> guessList = loadAnswerList();
         System.out.println("Starting...");
-        int[][] solutions = new int[answerList.size()][guessList.size()];
-
-        // calculate and save wordle solutions
-        for (int i = 0; i < answerList.size(); i++) {
-//            if (i % 10 == 0) System.out.printf("%d%%%n", i * 100 / answerList.size());
-            for (int j = 0; j < guessList.size(); j++) {
-                int solution = WordleEvaluator.evaluateCompact(guessList.get(j), answerList.get(i));
-                solutions[i][j] = solution;
-            }
-        }
+        int[][] solutions = createSolutions(answerList, guessList);
 
         int[] taken = new int[(int) Math.pow(3, WORD_LENGTH * 2)];
         int solutionCount = 0;
@@ -71,8 +68,9 @@ public class PuzzleGenerator {
         }
 
         bw.close();
-        System.out.printf("Completed in %d seconds. Found %d solutions, %d of which passed the threshold and were included in the output file at %s.%n", (System.currentTimeMillis() - startTime) / 1000, solutionCount, takenSolutions, file);
+        System.out.printf("Completed in %d seconds. Found %d solutions, %d of which passed the threshold and were included in the output file at %s.%n", timer.diff(), solutionCount, takenSolutions, file);
     }
+
 
 
     /**
@@ -91,15 +89,13 @@ public class PuzzleGenerator {
         return (10 - greens - yellows / 2.01f) / 10;
     }
 
-    private static String compactToReadable(int pattern) {
-        return String.format("%5s", Integer.toString(pattern, 3)).replace(' ', '0');
+    private static List<String> loadGuessList() {
+        return loadFile("/guess-list.txt");
+
     }
 
-    private static String twoCompactsToReadable(int pattern) {
-        String str = Integer.toString(pattern, 3);
-        return "0".repeat(10 - str.length()) + str;
-//        return String.format("%10s", Integer.toString(pattern, 3)).replace(' ', '0');
+    private static List<String> loadAnswerList() {
+        return loadFile("/answer-list.txt");
     }
-
 
 }
