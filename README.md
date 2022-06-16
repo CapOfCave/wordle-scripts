@@ -1,5 +1,4 @@
-# wordle-puzzle-generator
-Generate Wordle Puzzles
+# wordle-scripts
 
 This repository holds a few scripts, all based on the idea of dealing with a lot of Wordle puzzles simultaniously:
 
